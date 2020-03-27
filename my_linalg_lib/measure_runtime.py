@@ -1,0 +1,178 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""This module measures the performance of various programming languages."""
+
+import os
+import math
+import csv
+import logging
+import statistics
+import delegator
+import time
+from termcolor import colored
+
+
+class Measure:
+    """Initializes the Measurement
+
+        Arguments:
+            name : str  -- Name of the languages.
+            version_cmd : str -- Command to get the version.
+            run_cmd : str -- Command to run the program.
+            compile_cmd : str, optional -- Command to compile.
+    """
+
+    def __init__(self, name, version_cmd, run_cmd, compile_cmd=None, debug=False):
+        self.name = name
+        self.run_cmd = run_cmd
+        self.version_cmd = version_cmd
+        self.compile_cmd = compile_cmd
+        self.debug = debug
+        self.results = {"name": self.name}
+
+    def run(self):
+        """Run a measurement.
+
+        Returns:
+            list -- List of results.
+        """
+
+        print(f"> {self.name}")
+
+        if self.compile_cmd:
+            cmd_compile = delegator.run(self.compile_cmd)
+            if self.debug or cmd_compile.return_code is not 0:
+                logging.info(cmd_compile.out)
+
+        print(f"Version: {delegator.run(self.version_cmd).out.splitlines()[0]}")
+
+        times = []
+        count = 0
+        while count < 10:
+            count += 1
+            # Measure execution time
+            start_time = time.time()
+            cmd_run = delegator.run(self.run_cmd)
+            end_time = time.time()
+
+            # Convert the measurement into milliseconds
+            times.append(int((end_time - start_time) * 1000))
+
+        print(f"Speed (all): {'ms, '.join(map(str, times))}ms")
+        print(f"Speed (best): {min(times)}ms")
+        print(f"Speed (worst): {max(times)}ms")
+        print(f"Speed (median): {statistics.median(times)}ms")
+
+        # Strip output from new line
+        result = cmd_run.out.strip()
+        print(f"Result: {result}")
+
+        # Calculate accuracy
+        if not self.debug:
+            accuracy = self.diff_letters(f"{math.pi:.{len(result)-2}f}", result)
+            print(f"Accuracy: {accuracy:.2%}")
+        else:
+            accuracy = 0.0000
+
+        print()  # new line
+
+        self.results["median"] = statistics.median(times)
+        self.results["best"] = min(times)
+        self.results["worst"] = max(times)
+        self.results["accuracy"] = f"{accuracy*100:.4}"
+
+        return self.results
+
+    def diff_letters(self, first, second):
+        """Measure differences between result and actual π.
+
+        Arguments:
+            first: str -- First number for comparison.
+            second : str -- Second number for comparison.
+        """
+
+        if self.debug:
+            # Print also a visual diff between the numbers
+            combined = zip(first, second)
+            diff = []
+            for i, j in combined:
+                if i == j:
+                    print(i, "--", j)
+                else:
+                    diff.append(j)
+                    print(i, "  ", j)
+            return(len(first) - len(diff)) / len(first)
+
+        # Standard diff algorithm
+        return (len(first) - sum(first[i] != second[i] for i in range(len(first)))) / len(first)
+
+
+def ask_yes_no(question, default="yes"):
+    """Helper function to ask a yes/no question.
+
+    Arguments:
+        question : str -- Question which will be displayed.
+        default : str, optional -- Set the default answer to the question.
+    Returns:
+        True if the answer is yes, else it returns False.
+    """
+    valid = {"yes": True, "y": True,
+             "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        choice = input(f"\n{colored('❓', 'red')}  {question}{prompt}").lower()
+        if default is not None and choice == '':
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            print("Please respond with 'yes' or 'no'.\n")
+
+def measurement():
+    """Management function for the measurement.
+    """
+
+    # Change the working directory to the `src` folder
+    cwd = os.getcwd()
+    os.chdir(os.path.join(cwd, "src"))
+
+    with open("rounds.txt") as file:
+        iterations = file.read().strip()
+
+    print("\n======= Comparison =======")
+    print(f"Iterations: {iterations}\n")
+
+    languages = [
+        # language name / version command / execute command / compile command
+        ["Julia", "julia --version", "julia leibniz.jl"],
+        ["Python 3 (CPython)", "python --version", "python leibniz.py"],
+
+    ]
+
+    complete_results = []
+
+    for language in languages:
+        complete_results.append(Measure(*language).run())
+
+    if ask_yes_no("Do you want to save the results?"):
+        # Write csv file with results
+        os.chdir(os.path.join(cwd, "results"))
+
+        keys = complete_results[0].keys()
+
+        with open("data.csv", "w", newline="", encoding="utf8") as file:
+            dict_writer = csv.DictWriter(file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(complete_results)
+
+        print(f"Saved the results in: {colored('results/data.csv', 'red', attrs=['bold'])}")
+
+measurement()
