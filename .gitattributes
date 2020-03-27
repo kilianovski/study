@@ -1,0 +1,2 @@
+*.csv filter=lfs diff=lfs merge=lfs -text
+spark/data/sparkify_log_small.json filter=lfs diff=lfs merge=lfs -text
