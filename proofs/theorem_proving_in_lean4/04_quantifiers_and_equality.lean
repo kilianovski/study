@@ -9,6 +9,7 @@
 -- Let us think about predicates as of functions that takes a value and returns boolean.
 -- Can we think about them in such way?
 
+
 variable (α : Type)
 
 -- Unary Predicate in Lean:
@@ -97,6 +98,8 @@ example (x y : Nat) : (x + y) * (x + y) = x * x + y * x + x * y + y * y :=
 
 variable (α : Type) (p q : α → Prop)
 
+
+
 example : (∀ x, p x ∧ q x) ↔ (∀ x, p x) ∧ (∀ x, q x) :=
   Iff.intro
   (fun h : ((x : α) → p x ∧ q x) => 
@@ -151,6 +154,8 @@ example : (∀ x, p x ∨ r) ↔ (∀ x, p x) ∨ r :=
     (fun hf => Or.inl (hf hx))
     (fun hr => Or.inr hr)
   )
+
+
 
 
 example : (∀ x, r → p x) ↔ (r → ∀ x, p x) :=
@@ -231,6 +236,20 @@ example : (∀ x, p x) ↔ ¬ (∃ x, ¬ p x) := Iff.intro
   )
 
 
+open Classical
+
+theorem dne {p : Prop} (h : ¬¬p) : p :=
+  byCases
+    (fun h1 : p => h1)
+    (fun h1 : ¬p => absurd h1 h)
+
+theorem exists_neg : (¬ ∃ x, p x) → (∀ x, ¬ p x) := fun h : ( (∃ x, p x) → False ) =>
+  fun x => byContradiction (fun hnnpx : ¬¬(p x) => 
+    have hpx : p x := dne hnnpx
+    have he : (∃ x, p x) := Exists.intro x hpx
+    show False from (h he)
+  )
+
 example : (∃ x, p x) ↔ ¬ (∀ x, ¬ p x) := Iff.intro
   (fun h => fun ha => h.elim fun w => fun pw => 
     have hn : ¬ p w := ha w
@@ -247,14 +266,78 @@ example : (¬ ∀ x, p x) ↔ (∃ x, ¬ p x) := sorry
 example : (∀ x, p x → r) ↔ (∃ x, p x) → r := sorry
 
 
+
+
+#check Exists.intro
+#check byContradiction
+
 example (a : α) : (∃ x, p x → r) ↔ (∀ x, p x) → r := Iff.intro
 (fun h : (∃ x, p x → r) => fun ha : ((x : α) → p x) => h.elim fun u => fun pur => 
   have pu : p u := ha u
   show r from pur pu
 )
 
-
-(fun h => sorry)
+(fun h : (∀ x, p x) → r =>
+  show ∃ x, p x → r from
+    byCases
+      (fun hap : (∀ x, p x) => ⟨a, fun hpx => h hap ⟩)
+      (fun hn : ¬(∀ x, p x) => 
+        byContradiction (fun hnex : ¬(∃ x, p x → r) => 
+          have hap : ∀ x, p x := fun x =>
+            byContradiction
+            (fun hnp : ¬ p x => 
+              have hex : ∃ x, p x → r := ⟨x, fun hp => absurd hp hnp ⟩
+              show False from hnex hex
+            )
+          show False from hn hap
+        )
+      )
+)
 
 
 example (a : α) : (∃ x, r → p x) ↔ (r → ∃ x, p x) := sorry
+
+
+variable (f : Nat → Nat)
+variable (h : ∀ x : Nat, f x ≤ f (x + 1))
+
+#check Nat.le_trans
+
+example : f 0 ≤ f 3 :=
+  have : f 0 ≤ f 1 := h 0
+  have : f 0 ≤ f 2 := Nat.le_trans this (h 1)
+  show f 0 ≤ f 3 from Nat.le_trans this (h 2)
+
+
+variable (men : Type) (barber : men)
+variable (shaves : men → men → Prop)
+
+example (h : ∀ x : men, shaves barber x ↔ ¬ shaves x x) : False :=
+  have nh := h barber
+  have hp : (shaves barber barber) := byContradiction 
+      (fun hnp => 
+      have x:=(nh.mpr hnp) 
+      show False from hnp x
+      )
+  
+  have hnp : ¬(shaves barber barber) := nh.mp hp
+  have x := (hnp hp)
+  show False from x
+
+
+
+def even (n : Nat) : Prop := ∃ b : Nat, a = (2 * b)
+
+def prime (n : Nat) : Prop := sorry
+
+def infinitely_many_primes : Prop := sorry
+
+def Fermat_prime (n : Nat) : Prop := sorry
+
+def infinitely_many_Fermat_primes : Prop := sorry
+
+def goldbach_conjecture : Prop := sorry
+
+def Goldbach's_weak_conjecture : Prop := sorry
+
+def Fermat's_last_theorem : Prop := sorry
