@@ -1,0 +1,13 @@
+What is mechanistic interpretability?
+Is mechanistic interpretability appliable to real world?
+What is superposition and how can I understand it?
+How activation functions relate to interpretability of a model?
+What is feature?
+What is the difference between activation and a feature?
+What is a circuit?
+What is an Induction Head?
+How Induction Head was found?
+Why induction head is so important?
+What are other examples of found circuits except for Induction Head
+What is sparsity?
+What is the phase transition?
