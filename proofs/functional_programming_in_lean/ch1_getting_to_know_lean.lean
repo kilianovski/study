@@ -1,11 +1,20 @@
 
--- KEY CONCEPTS
+-- KEY NOTES
 /-
-1. Definitions written using abbrev are always unfolded
-2. Definitions that are to be unfolded are called reducible.
+
 
 -/
 
+/-
+ 1. abbrev vs def
+ 2. constructor overloading ::
+-/
+
+-- NOTES
+/-
+1. Definitions written using abbrev are always unfolded
+2. Definitions that are to be unfolded are called reducible.
+-/
 
 -- ##########
 
