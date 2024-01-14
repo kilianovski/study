@@ -25,13 +25,15 @@ class BinaryNode:
         if A.left: yield from A.left.subtree_iter()
         yield A.val
         if A.right: yield from A.right.subtree_iter()
-        
+
     def subtree_first(A):
         if A.left: return A.left.subtree_first()
         return A.val
     
     def successor(A):
         if A.right: return A.right.subtree_first()
+        
+        
 
 
 lesson_tree = BinaryNode('A', BinaryNode('B', BinaryNode('D', BinaryNode('F')), BinaryNode('E')), BinaryNode('C'))
