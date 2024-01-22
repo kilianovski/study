@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+    import { memory, generateCheckerBoard, CHECKERBOARD_BUFFER_POINTER, CHECKERBOARD_BUFFER_SIZE } from "./build/release.js";
+    const runWasm = () => {
+        console.log(memory)
+        const wasmByteMemoryArray = new Uint8Array(memory.buffer);
+        const canvasElement = document.querySelector("canvas");
+        // Set up Context and ImageData on the canvas
+        const canvasContext = canvasElement.getContext("2d");
+        const canvasImageData = canvasContext.createImageData(
+            canvasElement.width,
+            canvasElement.height
+        );
+
+        // Clear the canvas
+        canvasContext.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+        const getDarkValue = () => {
+            //return 0;
+            //return 0;
+            return Math.floor(Math.random() * 100);
+        };
+        
+        const getLightValue = () => {
+            //return 255;
+            //return 255;
+            return Math.floor(Math.random() * 127) + 127;
+        };
+
+        const drawCheckerBoard = () => {
+            const checkerBoardSize = 20;
+        
+            // Generate a new checkboard in wasm
+            generateCheckerBoard(
+              getDarkValue(),
+              getDarkValue(),
+              getDarkValue(),
+              getLightValue(),
+              getLightValue(),
+              getLightValue()
+            );
+        
+            // Pull out the RGBA values from Wasm memory, the we wrote to in wasm,
+            // starting at the checkerboard pointer (memory array index)
+            const imageDataArray = wasmByteMemoryArray.slice(
+              CHECKERBOARD_BUFFER_POINTER.valueOf(),
+              CHECKERBOARD_BUFFER_SIZE.valueOf()
+            );
+
+            console.log(imageDataArray);
+            // Set the values to the canvas image data
+            canvasImageData.data.set(imageDataArray);
+        
+            // Clear the canvas
+            canvasContext.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        
+            // Place the new generated checkerboard onto the canvas
+            canvasContext.putImageData(canvasImageData, 0, 0);
+          };
+        
+        setInterval(() => {
+            drawCheckerBoard();
+        }, 1000);
+    };
+        window.onload = function() {
+            setTimeout(runWasm, 10);
+        };
+
+</script>
+</head>
+<body>
+    <canvas
+    width="20"
+    height="20"
+    style="image-rendering: pixelated; image-rendering: crisp-edges; width: 300%;"
+  >
+  </canvas>
+</body>
+</html>

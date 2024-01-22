@@ -32,8 +32,6 @@ class BinaryNode:
     
     def successor(A):
         if A.right: return A.right.subtree_first()
-        
-        
 
 
 lesson_tree = BinaryNode('A', BinaryNode('B', BinaryNode('D', BinaryNode('F')), BinaryNode('E')), BinaryNode('C'))

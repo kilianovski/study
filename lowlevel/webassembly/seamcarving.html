@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Image Resizer</title>
+    <style>
+        #resize-container {
+            width: 300px; /* Initial width */
+            height: auto;
+            border: 1px solid black;
+            position: relative;
+            display: inline-block;
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+        }
+
+        .resizer {
+            width: 10px;
+            height: 100%;
+            background: gray;
+            position: absolute;
+            top: 0;
+            cursor: ew-resize;
+        }
+
+        .resizer.left {
+            left: 0;
+        }
+
+        .resizer.right {
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div id="resize-container">
+    <div class="resizer left"></div>
+    <img id="resize-image" src="mike_wazowski.jpg" alt="Resizable Image">
+    <div class="resizer right"></div>
+</div>
+
+<script>
+    let container = document.getElementById('resize-container');
+    let startWidth, startX;
+
+    const initResize = (e, isLeft) => {
+        startX = e.clientX;
+        startWidth = parseInt(document.defaultView.getComputedStyle(container).width, 10);
+        document.documentElement.addEventListener('mousemove', doDrag, false);
+        document.documentElement.addEventListener('mouseup', stopDrag, false);
+
+        if (isLeft) {
+            container.style.left = container.getBoundingClientRect().left + 'px';
+        }
+    };
+
+    const doDrag = (e) => {
+        const width = startWidth + e.clientX - startX;
+        container.style.width = width + 'px';
+    };
+
+    const stopDrag = (e) => {
+        document.documentElement.removeEventListener('mousemove', doDrag, false); 
+        document.documentElement.removeEventListener('mouseup', stopDrag, false);
+    };
+
+    document.querySelector('.resizer.left').addEventListener('mousedown', (e) => initResize(e, true));
+    document.querySelector('.resizer.right').addEventListener('mousedown', (e) => initResize(e, false));
+</script>
+
+</body>
+</html>
