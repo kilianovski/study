@@ -1,0 +1,62 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux8Way16.hdl
+/**
+ * 8-way 16-bit multiplexor:
+ * out = a if sel == 000
+ *       b if sel == 001
+ *       ...
+ *       h if sel == 111
+ */
+CHIP Mux8Way16 {
+    IN a[16], b[16], c[16], d[16],
+       e[16], f[16], g[16], h[16],
+       sel[3];
+    OUT out[16];
+
+    PARTS:
+    // Hypothesis 1: The selection bits are not being decoded correctly for an 8-way multiplexor.
+    // Hypothesis 2: The And16 and Or16 gates might not be used correctly to select the correct input.
+    // Hypothesis 3: The flags for e, f, g, and h are missing, and the corresponding And16 and Or16 parts are not implemented.
+    // Hypothesis 4: The final output is only considering the first four inputs (a, b, c, d) and not all eight inputs.
+
+    // Correcting the hypotheses:
+    Not(in=sel[0], out=notSel0);
+    Not(in=sel[1], out=notSel1);
+    Not(in=sel[2], out=notSel2);
+
+    And(a=notSel1, b=notSel0, out=abAnd);
+    And(a=notSel2, b=abAnd, out=aFlag); // a if sel == 000
+    And(a=sel[2], b=abAnd, out=bFlag); // b if sel == 001
+
+    And(a=sel[1], b=notSel0, out=cdAnd);
+    And(a=notSel2, b=cdAnd, out=cFlag); // c if sel == 010
+    And(a=sel[1], b=sel[0], out=cdAnd);
+    And(a=notSel2, b=cdAnd, out=dFlag); // d if sel == 011
+    And(a=notSel1, b=notSel0, out=efAnd);
+    And(a=sel[2], b=efAnd, out=eFlag); // e if sel == 100
+    And(a=notSel1, b=sel[0], out=efAnd);
+    And(a=sel[2], b=efAnd, out=fFlag); // f if sel == 101
+    And(a=sel[1], b=notSel0, out=ghAnd);
+    And(a=sel[2], b=ghAnd, out=gFlag); // g if sel == 110
+    And(a=sel[1], b=sel[0], out=ghAnd);
+    And(a=sel[2], b=ghAnd, out=hFlag); // h if sel == 111
+
+    And16(a=a, b[0..15]=aFlag, out=aMaybe);
+    And16(a=b, b[0..15]=bFlag, out=bMaybe);
+    And16(a=c, b[0..15]=cFlag, out=cMaybe);
+    And16(a=d, b[0..15]=dFlag, out=dMaybe);
+    And16(a=e, b[0..15]=eFlag, out=eMaybe);
+    And16(a=f, b[0..15]=fFlag, out=fMaybe);
+    And16(a=g, b[0..15]=gFlag, out=gMaybe);
+    And16(a=h, b[0..15]=hFlag, out=hMaybe);
+
+    Or16(a=aMaybe, b=bMaybe, out=abOr);
+    Or16(a=cMaybe, b=dMaybe, out=cdOr);
+    Or16(a=eMaybe, b=fMaybe, out=efOr);
+    Or16(a=gMaybe, b=hMaybe, out=ghOr);
+    Or16(a=abOr, b=cdOr, out=abcdOr);
+    Or16(a=efOr, b=ghOr, out=efghOr);
+    Or16(a=abcdOr, b=efghOr, out=out);
+}

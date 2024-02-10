@@ -1,0 +1,22 @@
+CHIP Mux4Way {
+    IN a, b, c, d, sel[2];
+    OUT out;
+    
+    PARTS:
+    //// Replace this comment with your code.
+
+    Not (in=sel[0], out=sel0Not);
+    Not (in=sel[1], out=sel1Not);
+
+    And (a=sel1Not, b=sel0Not, out=aFlag);
+    And (a=sel1Not, b=sel[0], out=bFlag);
+    And (a=sel[1], b=sel0Not, out=cFlag);
+    And (a=sel[1], b=sel[0], out=dFlag);
+
+    And (a=a, b=aFlag, out=aMaybe);
+    And (a=b, b=bFlag, out=bMaybe);
+    And (a=c, b=cFlag, out=cMaybe);
+    And (a=d, b=dFlag, out=dMaybe);
+
+    Or8Way(in[0]=aMaybe, in[1]=bMaybe, in[2]=cMaybe, in[3]=dMaybe, in[4..7]=false, out=out);
+}
