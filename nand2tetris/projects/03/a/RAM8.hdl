@@ -8,10 +8,80 @@
  * address is set to in; Otherwise, the value does not change.
  * The value of the selected register is emitted by out.
  */
+
+
+
+
 CHIP RAM8 {
     IN in[16], load, address[3];
     OUT out[16];
 
     PARTS:
+
+    DMux8Way(in=load, sel=address, 
+    
+    a=is000, 
+    b=is001, 
+    c=is010, 
+    d=is011, 
+    
+    e=is100, 
+    f=is101, 
+    g=is110, 
+    h=is111);
+
+    // HALL OF SHAME
+    // And16(
+    //     a[0]=is000, 
+    //     a[1]=is000, 
+    //     a[2]=is000, 
+    //     a[3]=is000, 
+    //     a[4]=is000, 
+    //     a[5]=is000, 
+    //     a[6]=is000, 
+    //     a[7]=is000, 
+    //     a[8]=is000,
+    //     a[9]=is000,
+    //     a[10]=is000,
+    //     a[11]=is000,
+    //     a[12]=is000,
+    //     a[13]=is000,
+    //     a[14]=is000,
+    //     a[15]=is000,
+    //     b=in, 
+    //     out=in000);
+
+
     //// Replace this comment with your code.
+    Register(in=in, load=is000, out=out000);
+    Register(in=in, load=is001, out=out001);
+
+    Register(in=in, load=is010, out=out010);
+    Register(in=in, load=is011, out=out011);
+
+    Register(in=in, load=is100, out=out100);
+    Register(in=in, load=is101, out=out101);
+
+    Register(in=in, load=is110, out=out110);
+    Register(in=in, load=is111, out=out111);
+
+     /**
+        * 8-way 16-bit multiplexor:
+        * out = a if sel == 000
+        *       b if sel == 001
+        *       ...
+        *       h if sel == 111
+    */
+    Mux8Way16(
+        a=out000, 
+        b=out001, 
+        c=out010, 
+        d=out011, 
+        
+        e=out100, 
+        f=out101, 
+        g=out110, 
+        h=out111, 
+        
+        sel=address, out=out);
 }

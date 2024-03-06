@@ -17,3 +17,8 @@ To create zip for submission:
 cd ./projects/02
 zip -r project2.zip .
 ```
+
+```bash
+cd ./projects/03
+zip -j project3.zip a/* b/*
+```

@@ -8,8 +8,9 @@ class TreeNode:
         self.val = val
         self.left = left
         self.right = right
-        
-    def __repr__(self): return f'TreeNode({self.val}, left={self.left}, right={self.right})'
+
+    def __repr__(self): return str(tree2ascii(self))
+    # def __repr__(self): return f'TreeNode({self.val}, left={self.left}, right={self.right})'
 
 def list2tree(root_list, cls=TreeNode):
     root = cls(val=root_list[0])
