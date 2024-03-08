@@ -22,3 +22,8 @@ zip -r project2.zip .
 cd ./projects/03
 zip -j project3.zip a/* b/*
 ```
+
+```bash
+cd ./projects/04
+zip -j project4.zip mult/* fill/*
+```
