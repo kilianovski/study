@@ -1,47 +1,291 @@
 import HTPILib.Chap4
 namespace HTPI.Exercises
 
+
+
 /- Section 4.2 -/
 -- 1.
 theorem Exercise_4_2_9a {A B C : Type} (R : Set (A × B))
-    (S : Set (B × C)) : Dom (comp S R) ⊆ Dom R := sorry
+    (S : Set (B × C)) : Dom (comp S R) ⊆ Dom R := by
+    define
+    fix a : A
+    assume h1
+    define
+    define at h1
+    obtain c h2 from h1
+    define at h2
+    obtain b h3 from h2
+    apply Exists.intro b
+    exact h3.left
+
+    done
+
+
+
 
 -- 2.
 theorem Exercise_4_2_9b {A B C : Type} (R : Set (A × B))
-    (S : Set (B × C)) : Ran R ⊆ Dom S → Dom (comp S R) = Dom R := sorry
+    (S : Set (B × C)) : Ran R ⊆ Dom S → Dom (comp S R) = Dom R := by
+    intro h1
+    apply Set.ext
+    fix a : A
+    apply Iff.intro
+    . --
+        intro h2
+        define at h2
+        obtain c h3 from h2
+        define at h3
+        define
+        obtain b h4 from h3
+        apply Exists.intro b
+        show (a, b) ∈ R from h4.left
+    . --
+        intro h2
+        define at h1
+        define at h2
+        obtain b h3 from h2
+        define
+        have h_b_RanR : (b ∈ Ran R) := by
+            apply Exists.intro a -- b ∈ Ran R --> (a, b) ∈ R
+            show (a, b) ∈ R from h3
+
+        have h_b_DomS : (b ∈ Dom S) := h1 h_b_RanR
+        define at h_b_DomS
+        obtain c h4 from h_b_DomS
+        apply Exists.intro c
+        define
+        apply Exists.intro b
+        show (a, b) ∈ R ∧ (b, c) ∈ S from ⟨h3, h4⟩
+
+    done
+
+
 
 -- 3.
 --Fill in the blank to get a correct theorem and then prove the theorem
 theorem Exercise_4_2_9c {A B C : Type} (R : Set (A × B))
-    (S : Set (B × C)) : ___ → Ran (comp S R) = Ran S := sorry
+    (S : Set (B × C)) : Dom S ⊆ Ran R → Ran (comp S R) = Ran S := by
+    intro h1
+    define at h1
+    apply Set.ext
+    fix c
+    apply Iff.intro
+    . -- c ∈ Ran (comp S R) → c ∈ Ran S
+        intro h2
+        define
+        define at h2
+        obtain a h3 from h2
+        define at h3
+        obtain b h4 from h3
+        apply Exists.intro b
+        show (b, c) ∈ S from h4.right
+    . -- c ∈ Ran S -> c ∈ Ran (comp S R)
+        intro h2
+        define
+        define at h2
+        obtain b h3 from h2
+
+        have h5 := @h1 b
+
+        have hb_RanR : (b ∈ Ran R) := by
+            apply h5
+            define
+            apply Exists.intro c
+            show (b, c) ∈ S from h3
+            done
+
+        define at hb_RanR
+        obtain a h6 from hb_RanR
+        apply Exists.intro a
+        define
+        apply Exists.intro b
+        show (a, b) ∈ R ∧ (b, c) ∈ S from ⟨h6, h3⟩
+
+    done
+
 
 -- 4.
 theorem Exercise_4_2_12a {A B C : Type}
     (R : Set (A × B)) (S T : Set (B × C)) :
-    (comp S R) \ (comp T R) ⊆ comp (S \ T) R := sorry
+    (comp S R) \ (comp T R) ⊆ comp (S \ T) R := by
+    define
+    intro ⟨a,c⟩ h1
+    define
+    define at h1
+
+    have ⟨h2, h3⟩ := h1
+    define at h2
+    obtain b hb from h2
+    apply Exists.intro b
+
+    apply And.intro
+
+    show (a, b) ∈ R from hb.left
+    define
+    apply And.intro
+    show (b, c) ∈ S from hb.right
+
+    assume hn
+
+    define at h3
+
+
+    have hcontra : (a, b) ∈ R ∧ (b, c) ∈ T := ⟨hb.left, hn⟩
+    have xxx : ∃ (x : B), (a, x) ∈ R ∧ (x, c) ∈ T := by
+        apply Exists.intro b
+        exact hcontra
+
+    have xx := h3 xxx
+    show False from xx
+    done
+
 
 -- 5.
 --You won't be able to complete this proof
 theorem Exercise_4_2_12b {A B C : Type}
     (R : Set (A × B)) (S T : Set (B × C)) :
-    comp (S \ T) R ⊆ (comp S R) \ (comp T R) := sorry
+    comp (S \ T) R ⊆ (comp S R) \ (comp T R) := by
+    define
+    fix ⟨a,c⟩
+    assume h1
+    define at h1
+    obtain b h2 from h1
+
+    have ⟨h3, h4⟩ :  ((b,c) ∈ S) ∧ ((b,c) ∉ T) := h2.right
+    have h5 : (a,c) ∈ comp S R := by
+        define
+        apply Exists.intro b
+        show (a, b) ∈ R ∧ (b, c) ∈ S from ⟨h2.left, h3⟩
+
+    -- this is where the mistake comes:
+
+    -- we need to prove non-existence of element x
+    -- ¬∃ (x : B), (a, x) ∈ R ∧ (x, c) ∈ T
+    -- satisfying property (a, x) ∈ R ∧ (x, c) ∈ T
+    -- and proof tries to do it with showing that
+    -- particular element b does not satisfy property (b, c) ∉ T
+    -- thanks for reference to https://github.com/debbie-drg/HowToProveItWithLean/blob/main/Chap4Ex.lean#L121
+    have h6 : (a,c) ∉ comp T R := by
+        define
+        sorry
+    -- have ⟨h3 : ((b,c) ∈ S), h4 :  ⟩ := sorry
+
+
+-- self-BONUS
+
+theorem Exercise_4_2_14a {A B C : Type}
+    (R : Set (A × B)) (S T : Set (B × C)) :
+
+    (S ⊆ T) → (comp S R ⊆ comp T R) := by
+        assume h1
+        define
+        fix ⟨a,c⟩
+        assume h2
+        define at h2
+        obtain b h3 from h2
+
+        define at h1
+        obtain h4 : (b,c) ∈ T := by
+            exact h1 h3.right
+
+        define
+        apply Exists.intro b
+        show (a, b) ∈ R ∧ (b, c) ∈ T from ⟨h3.left, h4⟩
+
+
+
 
 -- 6.
 --You might not be able to complete this proof
 theorem Exercise_4_2_14c {A B C : Type}
     (R : Set (A × B)) (S T : Set (B × C)) :
-    comp (S ∩ T) R = (comp S R) ∩ (comp T R) := sorry
+    comp (S ∩ T) R = (comp S R) ∩ (comp T R) := by
+
+    /-
+    R = { (0,0), (0, 1) }
+
+    S = { (0, a) }
+    T = { (1, a) }
+
+    comp S R = { (0, a) }
+    comp T R = { (0, a) }
+    (comp S R) ∩ (comp T R) = {}
+
+
+    S ∩ T = {}
+    comp (S ∩ T) R = {}
+
+    -/
+    sorry
+
+
 
 -- 7.
 --You might not be able to complete this proof
 theorem Exercise_4_2_14d {A B C : Type}
     (R : Set (A × B)) (S T : Set (B × C)) :
-    comp (S ∪ T) R = (comp S R) ∪ (comp T R) := sorry
+    comp (S ∪ T) R = (comp S R) ∪ (comp T R) := by
+    apply Set.ext
+    fix ⟨a,c⟩
+
+    apply Iff.intro
+
+    . -- (a, c) ∈ comp (S ∪ T) R → (a, c) ∈ comp S R ∪ comp T R
+        intro h1
+        define  at h1
+        obtain b h2 from h1
+        define
+        have h3 := h2.right
+        define at h3
+        by_cases on h3
+        . -- Case 1: (b, c) ∈ S
+            have h4 : (a, c) ∈ comp S R := by
+                define
+                apply Exists.intro b
+                show (a, b) ∈ R ∧ (b, c) ∈ S from ⟨h2.left, h3⟩
+            exact Or.inl h4
+
+        . -- Case 2: (b, c) ∈ T
+            have h4 : (a, c) ∈ comp T R := by
+                define
+                apply Exists.intro b
+                show (a, b) ∈ R ∧ (b, c) ∈ T from ⟨h2.left, h3⟩
+            exact Or.inr h4
+    . -- (a, c) ∈ comp S R ∪ comp T R → (a, c) ∈ comp (S ∪ T) R
+        intro h1
+        define
+        define at h1
+        by_cases on h1
+        . -- Case 1: h1 : (a, c) ∈ comp S R
+            define at h1
+            obtain b hb from h1
+            apply Exists.intro b
+            apply And.intro
+            show (a, b) ∈ R from hb.left
+            apply Or.inl
+            show (b, c) ∈ S from hb.right
+        . -- Case 2: h1 : (a, c) ∈ comp T R
+            define at h1
+            obtain b hb from h1
+            apply Exists.intro b
+            apply And.intro
+            show (a, b) ∈ R from hb.left
+            apply Or.inr
+            show (b, c) ∈ T from hb.right
+    done
+
 
 /- Section 4.3 -/
 -- 1.
 example :
-    elementhood Int 6 {n : Int | ∃ (k : Int), n = 2 * k} := sorry
+    elementhood Int 6 {n : Int | ∃ (k : Int), n = 2 * k} := by
+    define
+    have x : ℤ := 3
+
+    apply Exists.intro x
+
+    sorry
+
 
 -- 2.
 theorem Theorem_4_3_4_1 {A : Type} (R : BinRel A) :

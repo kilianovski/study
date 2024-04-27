@@ -1,0 +1,2 @@
+-- theorem Example_3_2_4
+--   (P Q R : Prop) : (h : ( P → Q → R) ) := (¬R → ())

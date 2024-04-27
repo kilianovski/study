@@ -37,7 +37,7 @@ theorem Exercise_3_3_1
 -- 2.
 theorem Exercise_3_3_8 (U : Type) (F : Set (Set U)) (A : Set U)
     (h1 : A ∈ F) : A ⊆ ⋃₀ F := by
-
+  define
   done
 
 -- 3.
