@@ -276,52 +276,314 @@ theorem Exercise_4_2_14d {A B C : Type}
 
 
 /- Section 4.3 -/
+
+theorem Theorem_4_3_4_2 {A : Type} (R : BinRel A) :
+    symmetric R ↔ extension R = inv (extension R) := by
+    apply Iff.intro
+    . -- symmetric R -> (R == inv R)
+        assume h1 : symmetric R
+        define at h1 -- h1 : ∀ (x y : A), R x y → R y x
+        ext ⟨x,y⟩
+        show (x, y) ∈ extension R ↔ (x, y) ∈ inv (extension R) from
+            calc (x, y) ∈ extension R
+            _ ↔ R x y := by rfl
+            _ ↔ R y x := by exact (Iff.intro (h1 x y) (h1 y x))
+            _ ↔ (y, x) ∈ (extension R) := by rfl
+            _ ↔ (x, y) ∈ inv (extension R) := by rfl
+    . -- (R == inv R) -> symmetric R
+        assume h1 : extension R = inv (extension R)
+        define
+        fix x; fix y;
+        assume h2 : R x y
+        -- have h3 : (x,y) ∈ extension R := ext_def R x y
+        have h3 := (ext_def R x y).mpr h2
+
+        rw [h1] at h3
+
+        define at h3
+        exact h3
+
+
 -- 1.
+
 example :
     elementhood Int 6 {n : Int | ∃ (k : Int), n = 2 * k} := by
     define
-    have x : ℤ := 3
-
-    apply Exists.intro x
-
-    sorry
+    apply Exists.intro 3
+    rfl
 
 
 -- 2.
 theorem Theorem_4_3_4_1 {A : Type} (R : BinRel A) :
-    reflexive R ↔ {(x, y) : A × A | x = y} ⊆ extension R := sorry
+    reflexive R ↔ {(x, y) : A × A | x = y} ⊆ extension R := by
+    apply Iff.intro
+    . -- reflexive R -> i_A ⊆ R
+        assume h1
+        define at h1
+
+        define
+        fix ⟨x,y⟩
+        assume h2
+        define at h2
+        define
+        have h3 := h1 y
+        rw [h2]
+        show R y y from h3
+    . -- i_A ⊆ R -> reflexive R
+        assume h1
+        define at h1
+        define
+        fix x
+        have pair : A × A := ⟨x,x⟩
+
+        have h2 := @h1 ⟨x,x⟩
+        have h3 :((x, x) ∈ {(x, y) : A × A | x = y}) := by
+            rfl
+        have h4 := h2 h3
+        define at h4
+        show R x x from h4
+
+#check RelFromExt
+#check ext_def
 
 -- 3.
 theorem Theorem_4_3_4_3 {A : Type} (R : BinRel A) :
     transitive R ↔
-      comp (extension R) (extension R) ⊆ extension R := sorry
+      comp (extension R) (extension R) ⊆ extension R := by
+      apply Iff.intro
+      . -- transitive -> R ∘ R ⊆ R
+        assume h1
+        fix ⟨x,y⟩
+
+        assume h2
+        define at h2
+        obtain z h3 from h2
+        define at h1
+        have h4 := h1 x z y
+        have h5 := h4 ((ext_def R x z).mp h3.left) ((ext_def R z y).mp h3.right)
+
+        show (x, y) ∈ extension R from (ext_def R x y).mpr  h5
+
+
+      . -- (R ∘ R) ⊆ R --> transitive
+        assume h1
+        define
+        define at h1
+
+        fix x; fix y; fix z;
+        have h1 := @h1 ⟨x, z⟩
+        assume h2; assume h3;
+
+
+        have h_comp :  (x, z) ∈ comp (extension R) (extension R)  := by
+            define
+            apply Exists.intro y
+            -- have h4 :=
+            show (x, y) ∈ extension R ∧ (y, z) ∈ extension R
+                from ⟨(ext_def R x y).mpr h2, (ext_def R y z).mpr h3⟩
+
+
+        have h5 := (ext_def R x z).mp (h1 h_comp)
+
+        show R x z from h5
+
+
+
+theorem Exercise_4_3_12a_more_general {A : Type} (R : BinRel A) :
+    reflexive R ↔
+    reflexive (RelFromExt (inv (extension R))) := by
+    apply Iff.intro
+    --
+    . --
+        assume h1
+        define at h1
+        define
+        intro a
+        define
+        exact h1 a
+    . --
+        assume h1
+        define at h1
+        define
+        fix a
+        have h2 := h1 a
+        define at h2
+        show R a a from h2
+
+
 
 -- 4.
+-- Reflexive means ∀ x, R x x
 theorem Exercise_4_3_12a {A : Type} (R : BinRel A) (h1 : reflexive R) :
-    reflexive (RelFromExt (inv (extension R))) := sorry
+    reflexive (RelFromExt (inv (extension R))) := by
+    define
+    fix x
+    define
+    define at h1
+    show R x x from h1 x
+    done
 
+-- transitive means: R x y -> R y z -> R x z
+
+-- theorem says: transitive R → transitive inv R
+-- R y x -> R z y -> R z x
 -- 5.
 theorem Exercise_4_3_12c {A : Type} (R : BinRel A) (h1 : transitive R) :
-    transitive (RelFromExt (inv (extension R))) := sorry
+    transitive (RelFromExt (inv (extension R))) := by
+    define at h1
+    define
+    fix x; fix y; fix z;
+    assume h2; define at h2
+    assume h3; define at h3;
+    define;
 
+    have proof := (h1 z y x) h3 h2
+    exact proof;
+
+
+-- S ∘ R ⊆ R ∘ S → transitive (R ∘ S)
 -- 6.
+
+theorem Exercise_4_3_18b {A : Type}
+    (R S : BinRel A) (h1 : transitive R) (h2 : transitive S)
+    (h3 : comp (extension S) (extension R) ⊆
+      comp (extension R) (extension S)) :
+
+      extension R ⊆ extension S := by
+      define
+      fix ⟨x, y⟩
+      assume h4;
+
+      define at h3;
+      have h3₁ := @h3 ⟨x, y⟩
+      have mh1 : ((x, y) ∈ comp (extension S) (extension R)) := by
+        define;
+        sorry
+      define;
+      sorry
+
+
 theorem Exercise_4_3_18 {A : Type}
     (R S : BinRel A) (h1 : transitive R) (h2 : transitive S)
     (h3 : comp (extension S) (extension R) ⊆
       comp (extension R) (extension S)) :
-    transitive (RelFromExt (comp (extension R) (extension S))) := sorry
+    transitive (RelFromExt (comp (extension R) (extension S))) := by
+    define
+    fix x; fix y; fix z;
+    assume hRSxy; define at hRSxy;
+    assume hRSyz; define at hRSyz;
+    obtain a₁ hr₁ from hRSxy;
+    obtain a₂ hr₂ from hRSyz;
+
+    define;
+
+    define at h3;
+
+    have hm1 : (a₁, a₂) ∈ comp (extension S) (extension R) := by
+        define
+        apply Exists.intro y
+        show (a₁, y) ∈ extension R ∧ (y, a₂) ∈ extension S from ⟨hr₁.right, hr₂.left⟩
+
+    have hm2 : (a₁, a₂) ∈ comp (extension R) (extension S) := h3 hm1
+    define at hm2
+
+    obtain a₃ hr₃ from hm2;
+
+    ---
+    define at h1;
+    define at h2;
+    apply Exists.intro a₃
+    apply And.intro
+
+    .
+        define
+        have hpart1 : (S x a₁ → S a₁ a₃ → S x a₃) := h2 x a₁ a₃
+
+        -- describe 'long way'
+        have hp1_1 : (S x a₁) := (ext_def S x a₁).mp hr₁.left
+        have hp1_2 : (S a₁ a₃) := (ext_def S a₁ a₃).mp hr₃.left
+        -- shortcut because S is transitive
+
+        show S x a₃ from hpart1 hp1_1 hp1_2
+    .
+        define
+        have hpart1 : (R a₃ a₂ → R a₂ z → R a₃ z) := h1 a₃ a₂ z
+
+        -- long way from a₃ to z through a₂
+        have hp1_1 : (R a₃ a₂) := (ext_def R a₃ a₂).mp hr₃.right
+        have hp1_2 : (R a₂ z) := (ext_def R a₂ z).mp hr₂.right
+
+        -- shortcut to z
+        show R a₃ z from hpart1 hp1_1 hp1_2
+
+
+
+
+lemma obtain_nonempty {A : Type} {X : Set A} (h : X ≠ ∅) : X.Nonempty := by
+    by_contra' h1
+    show False from h h1
+
 
 -- 7.
 theorem Exercise_4_3_20 {A : Type} (R : BinRel A) (S : BinRel (Set A))
     (h : ∀ (X Y : Set A), S X Y ↔ X ≠ ∅ ∧ Y ≠ ∅ ∧
     ∀ (x y : A), x ∈ X → y ∈ Y → R x y) :
-    transitive R → transitive S := sorry
+    transitive R → transitive S := by
+    assume h1
+    define; define at h1;
+    fix X; fix Y; fix Z;
+
+    assume hSXY; assume hSYZ;
+    -- have hSXY := extension S
+
+    have ⟨hXne, hYne, hXY⟩ := (h X Y).mp hSXY
+    have ⟨hYne, hZne, hYZ⟩ := (h Y Z).mp hSYZ
+
+    apply (h X Z).mpr
+
+    apply And.intro
+    show X ≠ ∅ from hXne
+
+    apply And.intro
+    show Z ≠ ∅ from hZne
+    fix x; fix z; assume hx; assume hz;
+
+
+    define at hYne;
+
+    obtain y hy from obtain_nonempty hYne;
+    have hRxy : R x y  := hXY x y hx hy
+    have hRyz : R y z  := hYZ y z hy hz
+    -- have q :=
+    show R x z from h1 x y z hRxy hRyz
+
+
 
 -- 8.
 --You might not be able to complete this proof
 theorem Exercise_4_3_13b {A : Type}
     (R1 R2 : BinRel A) (h1 : symmetric R1) (h2 : symmetric R2) :
-    symmetric (RelFromExt ((extension R1) ∪ (extension R2))) := sorry
+    symmetric (RelFromExt ((extension R1) ∪ (extension R2))) := by
+    define at h1; define at h2;
+    define;
+    fix x; fix y;
+    assume h3;
+    define at h3;
+    define;
+
+    by_cases on h3;
+
+
+    define at h3;
+    have t := (ext_def R1 y x).mpr ((h1 x y) h3)
+    exact Or.inl t
+
+    define at h3;
+    have t : (y,x) ∈ extension R2 := (ext_def R2 y x).mpr ((h2 x y) h3)
+    exact Or.inr t
+
+    -- show (y, x) ∈ extension R1 from t
+
 
 -- 9.
 --You might not be able to complete this proof
@@ -337,7 +599,49 @@ theorem Exercise_4_3_19 {A : Type} (R : BinRel A) (S : BinRel (Set A))
 
 /- Section 4.4 -/
 -- 1.
-theorem Example_4_4_3_1 {A : Type} : partial_order (sub A) := sorry
+theorem Example_4_4_3_1 {A : Type} : partial_order (sub A) := by
+    define
+    apply And.intro
+    -- reflexive ⊆
+    define
+    fix x;
+    define
+    fix a;
+    assume h; exact h;
+
+    apply And.intro
+    -- transitive
+    define
+    fix X; fix Y; fix Z;
+    assume hxy
+    define at hxy;
+
+    assume hyz
+    define at hyz;
+
+    define;
+    fix a
+    assume hx
+    have hy := hxy hx
+    exact hyz hy
+
+    define
+    fix X; fix Y;
+    assume hXY
+    define at hXY
+
+    assume hYX
+    define at hYX
+    ext x;
+    apply Iff.intro
+
+    . -- x ∈ X → x ∈ Y
+        assume hX
+        show x ∈ Y from hXY hX
+    . --
+        assume hY
+        show x ∈ X from hYX hY
+
 
 -- 2.
 theorem Theorem_4_4_6_1 {A : Type} (R : BinRel A) (B : Set A) (b : A)
@@ -399,7 +703,21 @@ theorem Exercise_4_4_24 {A : Type} (R : Set (A × A)) :
 -- 1.
 lemma overlap_implies_equal {A : Type}
     (F : Set (Set A)) (h : partition F) :
-    ∀ X ∈ F, ∀ Y ∈ F, ∀ (x : A), x ∈ X → x ∈ Y → X = Y := sorry
+    ∀ X ∈ F, ∀ Y ∈ F, ∀ (x : A), x ∈ X → x ∈ Y → X = Y := by
+    define at h;
+    intro X; intro hX;
+    intro Y; intro hY;
+
+    intro x; intro hxX; intro hxY;
+
+    ext a;
+
+
+    apply Iff.intro;
+
+    intro h2;
+
+
 
 -- 2.
 lemma Lemma_4_5_7_ref {A : Type} (F : Set (Set A)) (h : partition F) :
