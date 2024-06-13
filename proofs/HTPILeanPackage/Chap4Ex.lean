@@ -642,38 +642,265 @@ theorem Example_4_4_3_1 {A : Type} : partial_order (sub A) := by
         assume hY
         show x ∈ X from hYX hY
 
+-- Smallest el: ∀ x ∈ B, bRx
+-- Minimal el: ¬∃ x ∈ B, (xRb) ∧ (x ≠ b)
 
 -- 2.
 theorem Theorem_4_4_6_1 {A : Type} (R : BinRel A) (B : Set A) (b : A)
     (h1 : partial_order R) (h2 : smallestElt R b B) :
-    ∀ (c : A), smallestElt R c B → b = c := sorry
+    ∀ (c : A), smallestElt R c B → b = c := by
 
+    -- How to prove it?
+    -- Goal: smallest b is unique ---> no c ≠ b such that c is also smallest
+    -- More formally: from `smallest c` we can conclude that `c = b`
+    -- How?
+    -- ...
+    -- smallest means ∀ x, bRx.
+    -- Even for `c`
+    -- that is, bRc
+    -- but c is also smallest
+    -- antisymmetry!
+
+    define at h1
+    define at h2
+
+    have h_antisymmetric := h1.right.right
+    define at h_antisymmetric;
+    fix c
+    assume h_c_smallest
+    define at h_c_smallest
+
+    have h_cRb := h_c_smallest.right b h2.left
+    have h_bRc := h2.right c h_c_smallest.left
+
+    have proof := h_antisymmetric b c h_bRc h_cRb
+
+    exact proof
+
+
+
+-- lub = smallestElt R a {c : A | upperBd R c B}
+-- upperBd = ∀ x ∈ B, R x a
 -- 3.
 --If F is a set of sets, then ⋃₀ F is the lub of F in the subset ordering
 theorem Theorem_4_4_11 {A : Type} (F : Set (Set A)) :
-    lub (sub A) (⋃₀ F) F := sorry
+    lub (sub A) (⋃₀ F) F := by
+    define
+    apply And.intro
+    -- (⋃₀ F) is upperBd
+    define
+    fix X
+    assume h1
+    define
+    fix a
+    assume h2
+    define
+    apply Exists.intro X
+    show X ∈ F ∧ a ∈ X from ⟨h1, h2⟩
+
+
+    -- smallest
+    -- Proof Plan: we need to prove that (⋃₀ F) is smaller then any upperBd
+    -- that is, (⋃₀ F) ⊆ X, where X is upperBd
+    -- if X is upperBd, every set Y in F: Y ⊆ X
+    -- Goal (⋃₀ F) ⊆ X transform to (Z from F) ⊆ X
+    --
+    fix X
+    assume h1 -- h1: X - upperBd
+    define at h1 -- definition of upperBd: ∀ x ∈ F, sub A x X
+    define
+    fix a : A
+    assume h2 -- a ∈ ⋃₀ F
+    define at h2
+    obtain Z h3 from h2
+    have h4 := h1 Z h3.left
+    define at h4
+    show a ∈ X from h4 h3.right
+
 
 -- 4.
 theorem Exercise_4_4_8 {A B : Type} (R : BinRel A) (S : BinRel B)
     (T : BinRel (A × B)) (h1 : partial_order R) (h2 : partial_order S)
     (h3 : ∀ (a a' : A) (b b' : B),
       T (a, b) (a', b') ↔ R a a' ∧ S b b') :
-    partial_order T := sorry
+    partial_order T := by
+    define
+
+    apply And.intro
+    -- reflexive T
+
+    define
+    fix p
+    have ⟨a,b⟩ := p
+    have Raa := h1.left a
+    have Sbb := h2.left b
+    have reflexive := (h3 a a b b).mpr ⟨Raa, Sbb⟩
+    exact reflexive
+
+    apply And.intro
+    -- transitive T
+    define
+
+    fix ⟨a₁, b₁⟩;
+    fix ⟨a₂, b₂⟩;
+    fix ⟨a₃, b₃⟩;
+
+    assume hT1
+    assume hT2
+
+    have ⟨hR1, hS1⟩ := (h3 a₁ a₂ b₁ b₂).mp hT1
+    have ⟨hR2, hS2⟩ := (h3 a₂ a₃ b₂ b₃).mp hT2
+
+    -- have hR3  := h1.right.left hR1 hR2
+    have hR3 : (R a₁ a₃) := (h1.right.left a₁ a₂ a₃) hR1 hR2
+    have hS3 : (S b₁ b₃) := (h2.right.left b₁ b₂ b₃) hS1 hS2
+
+    have proof := (h3 a₁ a₃ b₁ b₃).mpr ⟨hR3, hS3⟩
+    exact proof
+
+    -- antisymmetric!
+    define
+
+    fix ⟨a₁, b₁⟩;
+    fix ⟨a₂, b₂⟩;
+
+    assume hT1;
+    assume hT2;
+
+    have ⟨hR1, hS1⟩ := (h3 a₁ a₂ b₁ b₂).mp hT1
+    have ⟨hR2, hS2⟩ := (h3 a₂ a₁ b₂ b₁).mp hT2
+
+    have antisymmetricT := h1.right.right
+    define at antisymmetricT
+    have ha := antisymmetricT a₁ a₂ hR1 hR2
+    rw [ha]
+
+    have antisymmetricS := h2.right.right
+    define at antisymmetricS
+    have hb := antisymmetricS b₁ b₂ hS1 hS2
+
+    rw [hb]
+
+
 
 -- 5.
+
+theorem Exercise_4_4_9_simpler {A B : Type} (R : BinRel A) (S : BinRel B)
+    (L : BinRel (A × B)) (h1 : total_order R) (h2 : total_order S)
+    (h3 : ∀ (a a' : A) (b b' : B),
+      L (a, b) (a', b') ↔ R a a') :
+    ∀ (a a' : A) (b b' : B),
+      L (a, b) (a', b') ∨ L (a', b') (a, b) := by
+        fix a; fix a';
+        fix b; fix b';
+
+        have ⟨h1_partial, h1_total⟩ := h1
+        have ⟨h2_partial, h2_total⟩ := h2
+
+        have h1or := h1_total a a'
+
+
+        by_cases on h1or
+
+        . -- R a a'
+            have hp1 := (h3 a a' b b').mpr -- R a a' → L (a, b) (a', b')
+            apply Or.inl
+            show L (a, b) (a', b') from (hp1 h1or)
+        . -- R a a'
+            have hp1 := (h3 a' a b' b).mpr -- R a a' → L (a, b) (a', b')
+            apply Or.inr
+            show L (a', b') (a, b) from (hp1 h1or)
+
 theorem Exercise_4_4_9_part {A B : Type} (R : BinRel A) (S : BinRel B)
     (L : BinRel (A × B)) (h1 : total_order R) (h2 : total_order S)
     (h3 : ∀ (a a' : A) (b b' : B),
       L (a, b) (a', b') ↔ R a a' ∧ (a = a' → S b b')) :
     ∀ (a a' : A) (b b' : B),
-      L (a, b) (a', b') ∨ L (a', b') (a, b) := sorry
+      L (a, b) (a', b') ∨ L (a', b') (a, b) := by
+        fix a; fix a';
+        fix b; fix b';
+
+        have ⟨h1_partial, h1_total⟩ := h1
+        have ⟨h2_partial, h2_total⟩ := h2
+
+        have h1or := h1_total a a'
+        have h2or := h2_total b b'
+
+        have h_my : a = a' → R a a' ∧ R a' a := by
+            assume heq
+            have h1_reflexive := h1_partial.left
+            define at h1_reflexive
+            have hRa := h1_reflexive a'
+            rw [heq]
+            exact ⟨hRa, hRa⟩
+
+
+        have h6 : a = a' ∨ a ≠ a' := eq_or_ne a a'
+
+        by_cases on h6
+
+        . -- a = a'
+            have ⟨hRa1, hRa2⟩ := h_my h6
+            by_cases on h2or
+            . --S b b'
+                left; rw [h3];
+                apply And.intro hRa1;
+                assume _; exact h2or;
+
+            . -- S b' b
+                right;
+                rw [h3];
+                apply And.intro hRa2;
+                assume _; exact h2or;
+
+        . -- a ≠ a'
+            by_cases on h1or;
+            . -- R a a'
+                left;
+                rw [h3];
+                apply And.intro h1or;
+                assume h6n; by_contra;
+                show False from h6 h6n;
+            . -- R a' a
+                right;
+                rw [h3]
+                apply And.intro h1or;
+                assume h6n;
+                by_contra;
+                have h6n := Eq.symm h6n;
+
+                show False from h6 h6n;
+
+    --     by_cases on h1or
+    --     by_cases on h2or
+    --     . -- R a a' S b b'
+    --         have hp1 := (h3 a a' b b').mpr -- R a a' → L (a, b) (a', b')
+    --         have hSb : (a = a' → S b b') := (λ x => h2or)
+
+    --         apply Or.inl
+    --         show L (a, b) (a', b') from (hp1 ⟨h1or, hSb⟩)
+
+    --     . -- R a a' S b' b
+    --         have hp1 := (h3 a a' b' b).mpr -- R a a' → L (a, b) (a', b')
+    --         have hSb : (a = a' → S b' b) := (λ x => h2or)
+
+    --         apply Or.inl
+    --         show L (a, b) (a', b') from (hp1 ⟨h1or, hSb⟩)
+
+
+
+
+
+
+    --   sorry
 
 -- 6.
 theorem Exercise_4_4_15a {A : Type}
     (R1 R2 : BinRel A) (B : Set A) (b : A)
     (h1 : partial_order R1) (h2 : partial_order R2)
     (h3 : extension R1 ⊆ extension R2) :
-    smallestElt R1 b B → smallestElt R2 b B := sorry
+    smallestElt R1 b B → smallestElt R2 b B := by
+
 
 -- 7.
 theorem Exercise_4_4_15b {A : Type}

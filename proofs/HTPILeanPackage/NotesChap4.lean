@@ -1,3 +1,4 @@
+import HTPILib.Chap4
 import HTPILib.HTPIDefs
 
 def Dom {A B : Type} (R : Set (A × B)) : Set A :=
@@ -77,9 +78,101 @@ theorem youtube_transitive {A : Type} (R : BinRel A) (h: ∀ (x y z : A), (R x y
 
 
 
--- theorem Theorem_4_3_4_1 
+-- theorem Theorem_4_3_4_1
 
-theorem Theorem_4_3_10 {A : Type} (R : BinRel A) :
-    {(x, x) : Dom (extension R) | x = y} ⊆ extension R := by
 
-    sorry
+
+def antisymmetric {A : Type} (R : BinRel A) : Prop :=
+  ∀ (x y : A), (R x y) → (R y x) → (x = y)
+
+def partial_order {A : Type} (R : BinRel A) : Prop :=
+  transitive R ∧ reflexive R ∧ antisymmetric R
+
+def total_order {A : Type} (R : BinRel A) : Prop :=
+  partial_order R ∧ ∀ (x y : A), (R x y) ∨ (R y x)
+
+#check antisymmetric
+-- def total_order
+
+def smallestElt {A : Type} (R : BinRel A) (b : A) (B : Set A) : Prop :=
+  b ∈ B ∧ ∀ x ∈ B, R b x
+
+def minimalElt {A : Type} (R : BinRel A) (b : A) (B : Set A) : Prop :=
+  b ∈ B ∧ ¬∃ x ∈ B, R x b ∧ x ≠ b
+
+
+
+theorem Theorem_4_4_6_2 {A : Type} (R : BinRel A) (B : Set A) (b : A)
+    (h1 : partial_order R) (h2 : smallestElt R b B) :
+    minimalElt R b B ∧ ∀ (c : A), minimalElt R c B → b = c := by
+    define at h1
+    define at h2
+    have ⟨hbB, hbSmallest⟩ := h2
+
+    have hAntisymmetric := h1.right.right
+    define at hAntisymmetric
+
+    apply And.intro
+    · -- Proof that b is minimal
+      define
+      apply And.intro hbB
+      assume hExistsEvenSmaller
+      obtain x hx from hExistsEvenSmaller
+      have hRbx : R b x := (hbSmallest x) hx.left
+      have hRxb : R x b := hx.right.left
+      have hxb := hAntisymmetric x b hRxb hRbx
+      show False from hx.right.right hxb
+    . -- Proof that it is unique minimal
+      intro c
+      assume hmin
+      have ⟨hcB, hmin⟩ := hmin
+
+      contradict hmin with h4
+
+      apply Exists.intro b
+
+      apply And.intro hbB
+
+      have h5 := (hbSmallest c) hcB
+      apply And.intro h5
+      show b ≠ c from h4
+
+
+theorem Theorem_4_4_6_3 {A : Type} (R : BinRel A) (B : Set A) (b : A)
+    (h1 : total_order R) (h2 : minimalElt R b B) : smallestElt R b B := by
+    define
+    define at h2
+    have ⟨h_partial, h_total⟩ := h1
+    define at h_partial
+
+    have ⟨h_transitive, h_reflexive, h_antisymmetric⟩ := h_partial
+
+    define at h_reflexive
+
+
+    apply And.intro h2.left
+    intro x
+
+    assume hxB
+
+    by_cases h4 : x = b
+    -- Case 1. h4 : x = b
+
+    rw [h4]
+    show R b b from h_reflexive b
+
+    -- Case 2. h4 : x ≠ b
+
+    have h5 : ∀ (x y : A), R x y ∨ R y x := h1.right
+    have h6 : R x b ∨ R b x := h5 x b
+
+    have h7 : ¬R x b := by
+      contradict h2.right with h8
+      apply Exists.intro x
+      apply And.intro hxB
+      apply And.intro h8
+      exact h4
+      done
+
+    disj_syll h6 h7
+    show R b x from h6
