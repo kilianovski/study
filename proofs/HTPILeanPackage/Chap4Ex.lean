@@ -901,30 +901,201 @@ theorem Exercise_4_4_15a {A : Type}
     (h3 : extension R1 ⊆ extension R2) :
     smallestElt R1 b B → smallestElt R2 b B := by
 
+    define at h3;
+
+    have h3my : (∀ (x y : A ), R1 x y → R2 x y) := by
+        fix x; fix y;
+
+        assume hR1
+
+        have h := @h3 (x, y);
+        rw [ext_def] at h;
+        rw [ext_def] at h;
+        apply h;
+        exact hR1;
+
+    assume h_smallest;
+    have ⟨hBb, h_smallest⟩ := h_smallest;
+
+    define;
+    apply And.intro hBb;
+    fix x;
+    assume hBx;
+    have h := h3my b x (h_smallest x hBx)
+    exact h;
+
+
 
 -- 7.
 theorem Exercise_4_4_15b {A : Type}
     (R1 R2 : BinRel A) (B : Set A) (b : A)
     (h1 : partial_order R1) (h2 : partial_order R2)
     (h3 : extension R1 ⊆ extension R2) :
-    minimalElt R2 b B → minimalElt R1 b B := sorry
+    minimalElt R2 b B → minimalElt R1 b B := by
+    have h3my : (∀ (x y : A ), R1 x y → R2 x y) := by
+        fix x; fix y;
+
+        assume hR1
+
+        have h := @h3 (x, y);
+        rw [ext_def] at h;
+        rw [ext_def] at h;
+        apply h;
+        exact hR1;
+
+    assume hmin;
+    define at hmin;
+    define;
+    apply And.intro hmin.left;
+
+    by_contra hminR1;
+
+    obtain x hx from hminR1;
+
+    have E : (∃ x ∈ B, R2 x b ∧ x ≠ b) := by
+        apply Exists.intro x
+        apply And.intro hx.left
+        have hRxb := h3my x b hx.right.left
+        apply And.intro hRxb
+
+        exact hx.right.right
+
+    show False from hmin.right E
+
+
+
+theorem Exercise_4_4_18a_helper {A : Type}
+    (R : BinRel A) (B1 B2 : Set A) (h1 : partial_order R)
+    (h2 : ∀ x ∈ B1, ∃ y ∈ B2, R x y) (h3 : ∀ x ∈ B2, ∃ y ∈ B1, R x y) :
+    ∀ (x : A), upperBd R x B1 → upperBd R x B2 := by
+    fix a;
+    assume h_upperBd;
+    define at h_upperBd;
+    define;
+    fix x;
+    assume hxB;
+
+    have h4 := h3 x hxB
+    obtain y hy from h4;
+
+    have h_Rya := h_upperBd y hy.left
+
+    have proof := h1.right.left x y a hy.right h_Rya
+    show R x a from proof
+
 
 -- 8.
 theorem Exercise_4_4_18a {A : Type}
     (R : BinRel A) (B1 B2 : Set A) (h1 : partial_order R)
     (h2 : ∀ x ∈ B1, ∃ y ∈ B2, R x y) (h3 : ∀ x ∈ B2, ∃ y ∈ B1, R x y) :
-    ∀ (x : A), upperBd R x B1 ↔ upperBd R x B2 := sorry
+    ∀ (x : A), upperBd R x B1 ↔ upperBd R x B2 := by
+    fix a;
+    apply Iff.intro;
+    assume h
+    have proof := Exercise_4_4_18a_helper R B1 B2 h1 h2 h3 a h
+    exact proof
+
+    assume h
+    have proof := Exercise_4_4_18a_helper R B2 B1 h1 h3 h2 a h
+    exact proof
+
+
+
 
 -- 9.
 theorem Exercise_4_4_22 {A : Type}
     (R : BinRel A) (B1 B2 : Set A) (x1 x2 : A)
     (h1 : partial_order R) (h2 : lub R x1 B1) (h3 : lub R x2 B2) :
-    B1 ⊆ B2 → R x1 x2 := sorry
+    B1 ⊆ B2 → R x1 x2 := by
 
+    define at h3
+    have ⟨h3_upper, h3_smallest⟩ := h3
+    define at h3_upper
+
+    have ⟨h2_upper, h2_smallest⟩ := h2
+    define at h2_upper
+    assume h_sub
+    define at h_sub
+
+    have h_my_upBd : x2 ∈ {c : A | upperBd R c B1} := by
+        define
+        fix x
+        assume hxB1
+        have hxB2 := h_sub hxB1
+        have proof := h3_upper x hxB2
+        exact proof
+
+
+    have proof := @h2_smallest x2 h_my_upBd
+    exact proof
+
+
+
+-- SYMMETRIC CLOSURE!!! :!
 -- 10.
 theorem Exercise_4_4_24 {A : Type} (R : Set (A × A)) :
     smallestElt (sub (A × A)) (R ∪ (inv R))
-    {T : Set (A × A) | R ⊆ T ∧ symmetric (RelFromExt T)} := sorry
+    {T : Set (A × A) | R ⊆ T ∧ symmetric (RelFromExt T)} := by
+    define
+    apply And.intro
+    -- subset + symmetric
+    define
+    apply And.intro
+    -- R ⊆ R ∪ inv R
+    define
+    fix a;
+    assume h
+    define
+    left; exact h;
+    -- symmetric R ∪ inv R
+
+    define
+    fix x; fix y;
+    assume h;
+    define;
+    define at h;
+
+    by_cases on h;
+    right
+    define; exact h;
+
+    define at h
+    left; exact h;
+
+    -- smallest
+
+    fix T
+    assume h1
+    define at h1
+
+    have ⟨h_sub, h_symm⟩ := h1
+
+    define
+    fix ⟨x,y⟩
+    assume h2;
+    define at h2;
+
+    define at h_sub;
+    define at h_symm;
+
+    have h3 := h_symm x y
+
+    by_cases on h2; -- either R or R⁻¹
+
+    -- (x, y) ∈ R
+
+    have h4 : (x, y) ∈ T := h_sub h2
+    show (x,y) ∈ T from h4
+
+    -- (x, y) ∈ R⁻¹
+    have h5 := h_symm y x
+    apply h5
+
+    define at h2
+
+    show (y,x) ∈ T from h_sub h2
+
+
 
 /- Section 4.5 -/
 -- 1.
